@@ -594,7 +594,10 @@ def makemkv_info(job, select=None, index=9999, options=None):
     if not isinstance(options, list):
         raise TypeError(options)
     # 1MB cache size to get info on the specified disc(s)
-    info_options = ["info", "--cache=1"] + options + [f"disc:{index:d}", f"--minlength={job.config.MINLENGTH}"]
+    # Address a single disc by device path (dev:) - safe with --noscan. Only the
+    # drive-list call (index 9999) still uses disc:. See /home/arm/apply_noscan_patch.py.
+    target = f"disc:{index:d}" if index == 9999 or not job.devpath else f"dev:{job.devpath}"
+    info_options = ["info", "--cache=1"] + options + [target, f"--minlength={job.config.MINLENGTH}"]
     wait_time = job.config.MANUAL_WAIT_TIME
     max_processes = cfg.arm_config["MAX_CONCURRENT_MAKEMKVINFO"]
     job.status = JobState.VIDEO_WAITING.value
@@ -647,7 +650,7 @@ def makemkv_backup(job, rawpath):
     cmd += [
         f"--minlength={job.config.MINLENGTH}",
         f"--progress={progress_log(job)}",
-        f"disc:{job.drive.mdisc:d}",
+        f"dev:{job.devpath}",  # dev:, not disc:N - see /home/arm/apply_noscan_patch.py
         rawpath,
     ]
     logging.info("Backing up disc")
@@ -1246,6 +1249,9 @@ def run(options, select):
         makemkvcon_path,
         "--robot",
         "--messages=-stdout",
+        # Never touch media in OTHER drives while enumerating: a scan stalls any
+        # drive that is mid-rip. See /home/arm/apply_noscan_patch.py.
+        "--noscan",
     ]
     cmd += list(options)
     buffer = []
