@@ -1,7 +1,6 @@
 """Force ARM to treat a disc as a TV series when its label matches our show registry.
 
-Called from arm/ripper/identify.py ,
-right after ARM's own title lookup and before anything acts on video_type.
+Called from arm/ripper/identify.py right after ARM's own title lookup and before anything acts on video_type.
 
 Why: ARM identifies a disc by searching its LABEL. MARVEL_STUDIOS_WANDAVISION_D1 came back
 as the 2023 movie "Lego Marvel Avengers: Code Red" (video_type movie). On a movie, the

@@ -22,7 +22,7 @@ from time import sleep, time
 import arm.config.config as cfg
 from arm.models import SystemDrives, Track
 from arm.models.job import JobState
-from arm.ripper import utils
+from arm.ripper import branch_hold, utils
 from arm.ripper.utils import notify
 from arm.ui import db
 
@@ -676,11 +676,7 @@ def makemkv_mkv(job, rawpath):
         track = Track.query.filter_by(job_id=job.job_id).order_by(
             Track.length.desc(), Track.chapters.desc(), Track.track_number.asc()).first()
         # Same-length titles that differ in size are language branches: hold for a human
-        # pick instead of taking the lowest track number. See /home/arm/branch_hold.py.
-        import sys
-        if "/home/arm" not in sys.path:
-            sys.path.insert(0, "/home/arm")
-        import branch_hold
+        # pick instead of taking the lowest track number. See branch_hold.py.
         track = branch_hold.resolve(job, track)
         rip_mainfeature(job, track, rawpath)
     elif mode == 'manual':  # Run if mode is manual, user selects tracks

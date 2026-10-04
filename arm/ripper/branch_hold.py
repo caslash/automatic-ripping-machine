@@ -11,9 +11,7 @@ so far); only a size difference means branching.
 Rather than guess, drop a hold for riptrack (credit frames + a pick key), wait as long as
 it takes for a human pick, and rip exactly that title.
 
-Lives in the repo (arm/ripper/branch_hold.py); formerly deployed on the bind mount so it survived container
-rebuilds. The hook that calls it lives in /opt/arm (image) and does NOT survive -- re-run
-apply_branch_hold_patch.py after every rebuild, after apply_mainfeature_fix.py.
+Lives in the repo. makemkv.py calls resolve() for movie discs under MAINFEATURE.
 """
 import fcntl, glob, json, logging, os, re, secrets, shutil, signal, struct, subprocess, tempfile, time
 

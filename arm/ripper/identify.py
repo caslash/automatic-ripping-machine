@@ -16,7 +16,7 @@ import xml.parsers.expat
 import arm.config.config as cfg
 from arm.models import Job
 
-from arm.ripper import utils
+from arm.ripper import show_override, utils
 from arm.ripper.ProcessHandler import arm_subprocess
 from arm.ui import db
 
@@ -87,11 +87,7 @@ def identify(job):
                 db.session.commit()
 
             # A label in our show registry is TV, whatever the title lookup said.
-            # See /home/arm/show_override.py.
-            import sys
-            if "/home/arm" not in sys.path:
-                sys.path.insert(0, "/home/arm")
-            import show_override
+            # See show_override.py.
             show_override.apply(job, db)
 
             logging.info(f"Disc title Post ident -  title:{job.title} "
