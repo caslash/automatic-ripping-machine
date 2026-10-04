@@ -672,6 +672,13 @@ def makemkv_mkv(job, rawpath):
         logging.info("Trying to find mainfeature (sorting by length desc, chapters desc, track_number asc)")
         track = Track.query.filter_by(job_id=job.job_id).order_by(
             Track.length.desc(), Track.chapters.desc(), Track.track_number.asc()).first()
+        # Same-length titles that differ in size are language branches: hold for a human
+        # pick instead of taking the lowest track number. See /home/arm/branch_hold.py.
+        import sys
+        if "/home/arm" not in sys.path:
+            sys.path.insert(0, "/home/arm")
+        import branch_hold
+        track = branch_hold.resolve(job, track)
         rip_mainfeature(job, track, rawpath)
     elif mode == 'manual':  # Run if mode is manual, user selects tracks
         # Set job status to waiting
