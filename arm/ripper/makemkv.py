@@ -830,6 +830,12 @@ def process_single_tracks(job, rawpath, mode: str):
 
     # Rip the track if the user has set it to rip, or in auto mode and the time is good
 
+    # Skipped tracks (over MAXLENGTH, under MINLENGTH, or not picked) are NOT ripped -
+    # ARM set ripped from MINLENGTH alone. See /home/arm/apply_length_skip_patch.py.
+    for track in job.tracks:
+        if not track.process:
+            track.ripped = False
+    db.session.commit()
     tracks_to_process = [track for track in job.tracks if track.process]
     process_index = 1
     for track in tracks_to_process:
