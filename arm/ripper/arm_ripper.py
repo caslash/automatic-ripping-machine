@@ -80,8 +80,15 @@ def rip_visual_media(have_dupes, job, logfile, protection):
     # Update final path if user has set a custom/manual title
     logging.debug(f"Job title status: [{job.title_manual}]")
     if job.title_manual:
-        # Remove the old final dir
-        utils.delete_raw_files([final_directory])
+        # Remove the old final dir - ONLY if empty. It can hold another disc of the same
+        # show, and rmtree destroyed Hawkeye D2 on 2026-09-24.
+        # See /home/arm/apply_final_dir_guard_patch.py.
+        try:
+            os.rmdir(final_directory)
+        except FileNotFoundError:
+            pass
+        except OSError:
+            logging.info(f"Keeping old final dir {final_directory} - not empty (another disc's files)")
         job_title = utils.fix_job_title(job)
         final_directory = os.path.join(job.config.COMPLETED_PATH, type_sub_folder, job_title)
         # Update the job.path with the final directory
