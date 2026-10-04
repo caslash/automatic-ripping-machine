@@ -86,6 +86,14 @@ def identify(job):
                 job.hasnicetitle = False
                 db.session.commit()
 
+            # A label in our show registry is TV, whatever the title lookup said.
+            # See /home/arm/show_override.py.
+            import sys
+            if "/home/arm" not in sys.path:
+                sys.path.insert(0, "/home/arm")
+            import show_override
+            show_override.apply(job, db)
+
             logging.info(f"Disc title Post ident -  title:{job.title} "
                          f"year:{job.year} video_type:{job.video_type} "
                          f"disctype: {job.disctype}")
