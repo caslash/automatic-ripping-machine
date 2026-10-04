@@ -119,7 +119,7 @@ function buildMiddleSection(job) {
     x = "<div class=\"col-lg-4\"><div class=\"card-body px-1 py-1\">";
     x += `<div id="jobId${job.job_id}_year"><strong>Year: </strong>${job.year}</div>`;
     x += `<div id="jobId${job.job_id}_video_type"><strong>Type: </strong>${job.video_type}</div>`;
-    x += `<div id="jobId${job.job_id}_devpath"><strong>Device: </strong>${job.devpath}</div>`;
+    x += `<div id="jobId${job.job_id}_devpath"><strong>Device: </strong>${job.devpath}${job.drive_label ? ` (${job.drive_label})` : ""}</div>`; // See /home/arm/apply_drive_label_patch.py
     x += `<div><strong>Status: </strong><img id="jobId${job.job_id}_status" 
                                src="static/img/${job.status}.png" height="20px" alt="${job.status}" title="${job.status}"></div>`;
     x += `<div id="jobId${job.job_id}_progress_section">${transcodingCheck(job)}</div></div></div>`;

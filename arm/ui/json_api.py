@@ -63,6 +63,17 @@ def get_x_jobs(job_status):
         for key, value in j.get_d().items():
             if key != "config":
                 job_results[i][str(key)] = str(value)
+        # Physical drive label (Settings > Drives > Description) for ACTIVE jobs, looked up
+        # by the drive's current /dev/srN. See /home/arm/apply_drive_label_patch.py
+        job_results[i]['drive_label'] = ""
+        if job_status == "joblist":
+            try:
+                from arm.models.system_drives import SystemDrives
+                drv = SystemDrives.query.filter_by(mount=j.devpath).first()
+                if drv and drv.description:
+                    job_results[i]['drive_label'] = str(drv.description)
+            except Exception:  # cosmetic - never break the job list
+                pass
         i += 1
     if jobs:
         app.logger.debug("jobs  - we have " + str(len(job_results)) + " jobs")

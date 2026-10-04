@@ -183,7 +183,7 @@ function updateJobItem(oldJob, job) {
     }
     // Go through and update job values as needed
     updateContents($(`#jobId${job.job_id}_year`), job, "Year", job.year);
-    updateContents($(`#jobId${job.job_id}_devpath`), job, "Device", job.devpath);
+    updateContents($(`#jobId${job.job_id}_devpath`), job, "Device", job.devpath + (job.drive_label ? ` (${job.drive_label})` : ""));  // See /home/arm/apply_drive_label_patch.py
     updateContents($(`#jobId${job.job_id}_video_type`), job, "Type", job.video_type);
     updateProgress(job, oldJob);
     updateContents($(`#jobId${job.job_id}_RIPMETHOD`), job, "Rip Method", job.config.RIPMETHOD);
