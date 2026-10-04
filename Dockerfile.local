@@ -1,0 +1,6 @@
+# Upstream ARM image with this fork's changes on top. Build:
+#   docker build -f Dockerfile.local --build-arg BASE=2.24.4 -t arm-fork:local .
+ARG BASE=2.24.4
+FROM automaticrippingmachine/automatic-ripping-machine:${BASE}
+COPY arm /opt/arm/arm
+COPY scripts/local /opt/arm/scripts/local
