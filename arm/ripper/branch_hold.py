@@ -65,6 +65,20 @@ def resolve(job, top):
     return next(t for t in rows if str(t.track_number) == str(number))
 
 
+def autopick(branches, wanted=None):
+    """The branch to take without asking, or None to fall back to the human pick.
+
+    ARM_BRANCH_AUTOPICK names a playlist (e.g. 00800.mpls). Disney's UHD discs put the English copy
+    at 00800 (Incredibles 2, Eternals, Hoppers: three of three), and the credit sheet that proves it
+    costs ~35 minutes of disc reading per disc. Only an EXACT, UNIQUE match is taken: if the playlist
+    is missing or appears twice, a person decides as before."""
+    wanted = (os.environ.get("ARM_BRANCH_AUTOPICK", "") if wanted is None else wanted).strip()
+    if not wanted:
+        return None
+    hits = [b for b in branches if b.get("mpls") == wanted]
+    return hits[0] if len(hits) == 1 else None
+
+
 def tied_titles(rows, top_length):
     """[(track_number, filesize, length)] within LENGTH_EPSILON of the longest, by number."""
     tied = [r for r in rows if r[2] is not None and r[2] >= top_length - LENGTH_EPSILON]
@@ -96,11 +110,19 @@ def hold_and_wait(job, tied, set_status=None, selftest=False):
         for b in branches:
             b["mpls"] = mapping[b["track_number"]]
         _write(hdir, "hold.json", hold)
-        windows = language_windows(mountpoint(job), [b["mpls"] for b in branches])
-        note = grab_sheet(job, branches, windows, height, os.path.join(hdir, "sheet.jpg"))
-        hold["sheet"] = "ready"
-        hold["sheet_detail"] = note or (f"frames from {len(windows)} language section(s) "
-                                        f"between {windows[0][0]:.0f}s and {windows[-1][1]:.0f}s")
+        auto = autopick(branches)
+        if auto is not None:
+            hold["sheet"] = "skipped"
+            hold["sheet_detail"] = (f"auto-picked {auto['letter']} ({auto['mpls']}) by ARM_BRANCH_AUTOPICK; "
+                                    "no credit sheet built")
+            _write(hdir, "decision.json", {"choice": auto["letter"], "decided": time.time(), "auto": True})
+            logging.info(f"branch hold {hid}: {hold['sheet_detail']}")
+        else:
+            windows = language_windows(mountpoint(job), [b["mpls"] for b in branches])
+            note = grab_sheet(job, branches, windows, height, os.path.join(hdir, "sheet.jpg"))
+            hold["sheet"] = "ready"
+            hold["sheet_detail"] = note or (f"frames from {len(windows)} language section(s) "
+                                            f"between {windows[0][0]:.0f}s and {windows[-1][1]:.0f}s")
     except Exception as e:
         logging.exception("branch hold: could not build the credit sheet")
         hold["sheet"] = "failed"
