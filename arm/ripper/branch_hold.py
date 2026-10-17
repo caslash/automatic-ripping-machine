@@ -23,6 +23,9 @@ LETTERS = "ABCDEFGH"
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 INFO_TIMEOUT = 20 * 60
 GRAB_TIMEOUT = 60 * 60
+# Taken without asking when it is exactly one of the tied branches. A default in code, not just
+# the env: udev starts main.py with a clean environment, so the container's env never reaches it.
+AUTOPICK_DEFAULT = "00800.mpls"
 
 # Which language sections to grab frames from. A bluray: input cannot seek -- -ss before
 # -i returns an empty output -- so every second of window costs a second of disc read,
@@ -68,11 +71,12 @@ def resolve(job, top):
 def autopick(branches, wanted=None):
     """The branch to take without asking, or None to fall back to the human pick.
 
-    ARM_BRANCH_AUTOPICK names a playlist (e.g. 00800.mpls). Disney's UHD discs put the English copy
+    ARM_BRANCH_AUTOPICK names a playlist (default AUTOPICK_DEFAULT; set it empty to turn this off,
+    though only a process that inherits the env sees it). Disney's UHD discs put the English copy
     at 00800 (Incredibles 2, Eternals, Hoppers: three of three), and the credit sheet that proves it
     costs ~35 minutes of disc reading per disc. Only an EXACT, UNIQUE match is taken: if the playlist
     is missing or appears twice, a person decides as before."""
-    wanted = (os.environ.get("ARM_BRANCH_AUTOPICK", "") if wanted is None else wanted).strip()
+    wanted = (os.environ.get("ARM_BRANCH_AUTOPICK", AUTOPICK_DEFAULT) if wanted is None else wanted).strip()
     if not wanted:
         return None
     hits = [b for b in branches if b.get("mpls") == wanted]

@@ -9,9 +9,14 @@ BRANCHES = [{"letter": "A", "mpls": "00800.mpls"}, {"letter": "B", "mpls": "0080
 
 
 class AutopickTests(unittest.TestCase):
-    def test_off_by_default(self):
+    def test_00800_by_default(self):
+        # udev-started rippers get no container env, so the default must do the work
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop("ARM_BRANCH_AUTOPICK", None)
+            self.assertEqual(branch_hold.autopick(BRANCHES)["letter"], "A")
+
+    def test_empty_env_turns_it_off(self):
+        with mock.patch.dict(os.environ, {"ARM_BRANCH_AUTOPICK": ""}):
             self.assertIsNone(branch_hold.autopick(BRANCHES))
 
     def test_picks_the_exact_playlist(self):
