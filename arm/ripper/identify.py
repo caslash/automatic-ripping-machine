@@ -16,7 +16,7 @@ import xml.parsers.expat
 import arm.config.config as cfg
 from arm.models import Job
 
-from arm.ripper import show_override, utils
+from arm.ripper import discdb_capture, show_override, utils
 from arm.ripper.ProcessHandler import arm_subprocess
 from arm.ui import db
 
@@ -94,6 +94,9 @@ def identify(job):
                          f"year:{job.year} video_type:{job.video_type} "
                          f"disctype: {job.disctype}")
             logging.debug(f"identify.job.end ---- \n\r{job.pretty_table()}")
+    # Save what TheDiscDb needs while the disc is still mounted. Never raises. See discdb_capture.py.
+    if mounted:
+        discdb_capture.apply(job)
     # No need to warn if we cant unmount
     arm_subprocess(["umount", job.devpath])
 
